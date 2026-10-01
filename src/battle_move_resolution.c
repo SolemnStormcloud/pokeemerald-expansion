@@ -2850,8 +2850,15 @@ static enum CancelerResult CancelerEffectivenessSound(struct BattleCalcValues *c
 
     switch (moveResultFlags)
     {
-    case MOVE_RESULT_SUPER_EFFECTIVE:
     case MOVE_RESULT_EXTREMELY_EFFECTIVE:
+        #if TESTING
+        if (gTestRunnerEnabled)
+            TestRunner_Battle_RecordEffectivenessSound(gBattlerTarget, SE_EXTREMELY_EFFECTIVE);
+        #endif
+        BtlController_EmitPlaySE(gBattlerTarget, B_COMM_TO_CONTROLLER, SE_EXTREMELY_EFFECTIVE);
+        MarkBattlerForControllerExec(gBattlerTarget);
+        break;
+    case MOVE_RESULT_SUPER_EFFECTIVE:
         #if TESTING
         if (gTestRunnerEnabled)
             TestRunner_Battle_RecordEffectivenessSound(gBattlerTarget, SE_SUPER_EFFECTIVE);
@@ -2860,12 +2867,19 @@ static enum CancelerResult CancelerEffectivenessSound(struct BattleCalcValues *c
         MarkBattlerForControllerExec(gBattlerTarget);
         break;
     case MOVE_RESULT_NOT_VERY_EFFECTIVE:
-    case MOVE_RESULT_MOSTLY_INEFFECTIVE:
         #if TESTING
         if (gTestRunnerEnabled)
             TestRunner_Battle_RecordEffectivenessSound(gBattlerTarget, SE_NOT_EFFECTIVE);
         #endif
         BtlController_EmitPlaySE(gBattlerTarget, B_COMM_TO_CONTROLLER, SE_NOT_EFFECTIVE);
+        MarkBattlerForControllerExec(gBattlerTarget);
+        break;
+    case MOVE_RESULT_MOSTLY_INEFFECTIVE:
+        #if TESTING
+        if (gTestRunnerEnabled)
+            TestRunner_Battle_RecordEffectivenessSound(gBattlerTarget, SE_MOSTLY_INEFFECTIVE);
+        #endif
+        BtlController_EmitPlaySE(gBattlerTarget, B_COMM_TO_CONTROLLER, SE_MOSTLY_INEFFECTIVE);
         MarkBattlerForControllerExec(gBattlerTarget);
         break;
     case MOVE_RESULT_DOESNT_AFFECT_FOE:
@@ -2877,7 +2891,16 @@ static enum CancelerResult CancelerEffectivenessSound(struct BattleCalcValues *c
     case MOVE_RESULT_FOE_HUNG_ON:
     case MOVE_RESULT_STURDIED:
     default:
-        if (moveResultFlags & MOVE_RESULT_HIGH_EFFECTIVENESS)
+        if (moveResultFlags & MOVE_RESULT_EXTREMELY_EFFECTIVE)
+        {
+            #if TESTING
+            if (gTestRunnerEnabled)
+                TestRunner_Battle_RecordEffectivenessSound(gBattlerTarget, SE_EXTREMELY_EFFECTIVE);
+            #endif
+            BtlController_EmitPlaySE(gBattlerTarget, B_COMM_TO_CONTROLLER, SE_EXTREMELY_EFFECTIVE);
+            MarkBattlerForControllerExec(gBattlerTarget);
+        }
+        else if (moveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE)
         {
             #if TESTING
             if (gTestRunnerEnabled)
@@ -2886,13 +2909,22 @@ static enum CancelerResult CancelerEffectivenessSound(struct BattleCalcValues *c
             BtlController_EmitPlaySE(gBattlerTarget, B_COMM_TO_CONTROLLER, SE_SUPER_EFFECTIVE);
             MarkBattlerForControllerExec(gBattlerTarget);
         }
-        else if (moveResultFlags & MOVE_RESULT_LOW_EFFECTIVENESS)
+        else if (moveResultFlags & MOVE_RESULT_NOT_VERY_EFFECTIVE)
         {
             #if TESTING
             if (gTestRunnerEnabled)
                 TestRunner_Battle_RecordEffectivenessSound(gBattlerTarget, SE_NOT_EFFECTIVE);
             #endif
             BtlController_EmitPlaySE(gBattlerTarget, B_COMM_TO_CONTROLLER, SE_NOT_EFFECTIVE);
+            MarkBattlerForControllerExec(gBattlerTarget);
+        }
+        else if (moveResultFlags & MOVE_RESULT_MOSTLY_INEFFECTIVE)
+        {
+            #if TESTING
+            if (gTestRunnerEnabled)
+                TestRunner_Battle_RecordEffectivenessSound(gBattlerTarget, SE_MOSTLY_INEFFECTIVE);
+            #endif
+            BtlController_EmitPlaySE(gBattlerTarget, B_COMM_TO_CONTROLLER, SE_MOSTLY_INEFFECTIVE);
             MarkBattlerForControllerExec(gBattlerTarget);
         }
         else if (!(moveResultFlags & (MOVE_RESULT_DOESNT_AFFECT_FOE | MOVE_RESULT_FAILED)))
